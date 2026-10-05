@@ -1,4 +1,4 @@
-# InvoiceFlow AI
+# FinFlow
 
 **AI-Powered Invoice Processing & Business Automation Platform**
 
