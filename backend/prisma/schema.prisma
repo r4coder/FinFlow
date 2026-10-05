@@ -1,0 +1,499 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  FINANCE_MANAGER
+  FINANCE_USER
+  VIEWER
+}
+
+enum InvoiceStatus {
+  UPLOADED
+  PROCESSING
+  EXTRACTED
+  VALIDATING
+  PENDING_APPROVAL
+  MANUAL_REVIEW
+  APPROVED
+  REJECTED
+  PAID
+  FAILED
+}
+
+enum ProcessingStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ApprovalStatus {
+  WAITING
+  PENDING
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+  CANCELLED
+}
+
+enum AiMode {
+  MOCK
+  GEMINI
+}
+
+enum RuleTrigger {
+  INVOICE_UPLOADED
+  INVOICE_PROCESSED
+  INVOICE_VALIDATION_FAILED
+  DUPLICATE_DETECTED
+  ANOMALY_DETECTED
+  APPROVAL_REQUESTED
+  APPROVAL_COMPLETED
+  INVOICE_APPROVED
+  INVOICE_REJECTED
+}
+
+enum ExecutionResult {
+  NOT_MATCHED
+  SUCCESS
+  PARTIAL_FAILURE
+  FAILED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  industry    String?
+  companySize String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  settings    OrganizationSettings?
+  onboarding  Onboarding?
+  members     OrganizationMember[]
+  vendors     Vendor[]
+  invoices    Invoice[]
+  rules       BusinessRule[]
+  executions  BusinessRuleExecution[]
+  approvals   Approval[]
+  notifications Notification[]
+  auditLogs   AuditLog[]
+  credentials Credential[]
+  tags        Tag[]
+  tasks       Task[]
+}
+
+model OrganizationSettings {
+  id                   String       @id @default(uuid())
+  organizationId       String       @unique
+  aiMode               AiMode       @default(MOCK)
+  aiModel              String       @default("gemini-2.5-flash")
+  roundingTolerance    Decimal      @default(0.05) @db.Decimal(12, 2)
+  maxUploadMb          Int          @default(10)
+  highAmountMultiplier Float        @default(3)
+  defaultCurrency      String       @default("INR")
+  updatedAt            DateTime     @updatedAt
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Onboarding {
+  id             String       @id @default(uuid())
+  organizationId String       @unique
+  aiConfigured   Boolean      @default(false)
+  rulesReviewed  Boolean      @default(false)
+  firstInvoice   Boolean      @default(false)
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  fullName     String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+
+  memberships   OrganizationMember[]
+  refreshTokens RefreshToken[]
+  resetTokens   PasswordResetToken[]
+}
+
+model OrganizationMember {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String
+  role           Role
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+model RefreshToken {
+  id             String    @id @default(uuid())
+  userId         String
+  organizationId String
+  tokenHash      String    @unique
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Vendor {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  normalizedName String
+  email          String?
+  phone          String?
+  address        String?
+  taxId          String?
+  paymentTerms   String?
+  industry       String?
+  group          String?
+  verified       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices     Invoice[]
+
+  @@unique([organizationId, normalizedName])
+  @@index([organizationId, taxId])
+}
+
+model Invoice {
+  id                  String           @id @default(uuid())
+  organizationId      String
+  invoiceNumber       String?
+  vendorId            String?
+  invoiceDate         DateTime?        @db.Date
+  dueDate             DateTime?        @db.Date
+  currency            String?
+  subtotal            Decimal?         @db.Decimal(14, 2)
+  tax                 Decimal?         @db.Decimal(14, 2)
+  total               Decimal?         @db.Decimal(14, 2)
+  purchaseOrderNumber String?
+  paymentTerms        String?
+  status              InvoiceStatus    @default(UPLOADED)
+  processingStatus    ProcessingStatus @default(QUEUED)
+  riskLevel           RiskLevel?
+  riskScore           Int?
+  source              String           @default("UPLOAD")
+  fileUrl             String?
+  fileName            String?
+  mimeType            String?
+  fileHash            String?
+  uploadedBy          String?
+  approvedBy          String?
+  approvedAt          DateTime?
+  rejectedBy          String?
+  rejectedAt          DateTime?
+  rejectionReason     String?
+  aiConfidence        Float?
+  extraction          Json?
+  validation          Json?
+  anomalies           Json?
+  aiAnalysis          Json?
+  exceptionReasons    Json?
+  duplicateDetected   Boolean          @default(false)
+  duplicateOfId       String?
+  autoApproved        Boolean          @default(false)
+  useStoredData       Boolean          @default(false)
+  processingRun       Int              @default(0)
+  completedRun        Int              @default(0)
+  retryCount          Int              @default(0)
+  lockedAt            DateTime?
+  failureReason       String?
+  processedAt         DateTime?
+  processingMs        Int?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  vendor       Vendor?            @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  lineItems    InvoiceLineItem[]
+  approvals    Approval[]
+  executions   BusinessRuleExecution[]
+  tags         InvoiceTag[]
+  tasks        Task[]
+  aiJobs       AIProcessingJob[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+  @@index([organizationId, vendorId, invoiceNumber])
+  @@index([organizationId, fileHash])
+  @@index([organizationId, riskLevel])
+}
+
+model InvoiceLineItem {
+  id          String  @id @default(uuid())
+  invoiceId   String
+  description String
+  quantity    Decimal @db.Decimal(14, 4)
+  unitPrice   Decimal @db.Decimal(14, 2)
+  taxRate     Decimal? @db.Decimal(6, 2)
+  taxAmount   Decimal? @db.Decimal(14, 2)
+  lineTotal   Decimal @db.Decimal(14, 2)
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model Approval {
+  id             String         @id @default(uuid())
+  organizationId String
+  invoiceId      String
+  level          Int
+  totalLevels    Int
+  approverRole   Role?
+  approverUserId String?
+  status         ApprovalStatus
+  ruleId         String?
+  ruleKey        String         @default("system")
+  runKey         String
+  requestedBy    String?
+  decidedBy      String?
+  decidedAt      DateTime?
+  comment        String?
+  createdAt      DateTime       @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoice      Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@unique([invoiceId, runKey, ruleKey, level])
+  @@index([organizationId, status])
+}
+
+model BusinessRule {
+  id             String      @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  enabled        Boolean     @default(true)
+  priority       Int         @default(100)
+  trigger        RuleTrigger
+  conditions     Json
+  actions        Json
+  version        Int         @default(1)
+  templateKey    String?
+  createdBy      String?
+  updatedBy      String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  versions     BusinessRuleVersion[]
+  executions   BusinessRuleExecution[]
+
+  @@index([organizationId, enabled, trigger])
+  @@index([organizationId, priority])
+}
+
+model BusinessRuleVersion {
+  id             String   @id @default(uuid())
+  ruleId         String
+  organizationId String
+  version        Int
+  snapshot       Json
+  changeSummary  String
+  changedBy      String?
+  changedByName  String?
+  changedAt      DateTime @default(now())
+  rule           BusinessRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@unique([ruleId, version])
+  @@index([organizationId])
+}
+
+model BusinessRuleExecution {
+  id                  String          @id @default(uuid())
+  organizationId      String
+  ruleId              String
+  ruleVersion         Int
+  ruleName            String
+  invoiceId           String
+  trigger             RuleTrigger
+  runKey              String
+  depth               Int             @default(0)
+  conditionsEvaluated Json
+  matched             Boolean
+  actionsExecuted     Json
+  result              ExecutionResult
+  error               String?
+  startedAt           DateTime
+  completedAt         DateTime
+  durationMs          Int
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rule         BusinessRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  invoice      Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@unique([ruleId, invoiceId, trigger, runKey])
+  @@index([organizationId, startedAt])
+  @@index([organizationId, ruleId])
+  @@index([invoiceId])
+}
+
+model Notification {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String
+  type           String
+  title          String
+  message        String
+  invoiceId      String?
+  read           Boolean  @default(false)
+  dedupeKey      String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId, dedupeKey])
+  @@index([organizationId, userId, read])
+}
+
+model Task {
+  id             String       @id @default(uuid())
+  organizationId String
+  invoiceId      String?
+  title          String
+  priority       TaskPriority @default(MEDIUM)
+  status         TaskStatus   @default(OPEN)
+  assigneeId     String?
+  assigneeRole   Role?
+  dueAt          DateTime?
+  ruleId         String?
+  dedupeKey      String
+  createdAt      DateTime     @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoice      Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, dedupeKey])
+  @@index([organizationId, status])
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String?
+  userName       String?
+  action         String
+  entityType     String
+  entityId       String?
+  invoiceId      String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, invoiceId])
+  @@index([organizationId, action])
+}
+
+model AIProcessingJob {
+  id             String    @id @default(uuid())
+  organizationId String
+  invoiceId      String
+  runNumber      Int
+  attempt        Int       @default(1)
+  status         String
+  provider       String
+  model          String?
+  error          String?
+  durationMs     Int?
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([organizationId, startedAt])
+}
+
+model Credential {
+  id             String   @id @default(uuid())
+  organizationId String
+  provider       String
+  ciphertext     String
+  iv             String
+  authTag        String
+  hint           String
+  createdBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, provider])
+}
+
+model Tag {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  color          String?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices       InvoiceTag[]
+
+  @@unique([organizationId, name])
+}
+
+model InvoiceTag {
+  invoiceId String
+  tagId     String
+  ruleId    String?
+  createdAt DateTime @default(now())
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([invoiceId, tagId])
+}

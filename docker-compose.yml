@@ -1,0 +1,72 @@
+# InvoiceFlow AI — `docker compose up --build`
+# UI:       http://localhost:5173      API docs: http://localhost:4000/api/docs
+# Demo:     admin@invoiceflow.demo / Demo@12345
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-invoiceflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-invoiceflow_dev_password}
+      POSTGRES_DB: invoiceflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-invoiceflow} -d invoiceflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-invoiceflow}:${POSTGRES_PASSWORD:-invoiceflow_dev_password}@postgres:5432/invoiceflow?schema=public
+      REDIS_URL: redis://redis:6379
+      # !! Development defaults. Generate your own for any real deployment: openssl rand -hex 32
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-only-refresh-secret-change-me-0123456789abcdef}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev-only-encryption-key-change-me-0123456789abcdef}
+      AI_MODE: ${AI_MODE:-mock}
+      AI_MODEL: ${AI_MODEL:-gemini-2.5-flash}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:4000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      QUEUE_MODE: bullmq
+      RUN_WORKER: "true"
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
+      STORAGE_DIR: /app/storage
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+    volumes:
+      - uploads:/app/storage
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:

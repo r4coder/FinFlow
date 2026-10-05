@@ -1,0 +1,528 @@
+{
+ "fields": [
+  {
+   "key": "invoice.total",
+   "label": "Invoice total",
+   "type": "number",
+   "group": "Amount",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "greater_than",
+     "label": "is greater than"
+    },
+    {
+     "key": "greater_than_or_equal",
+     "label": "is greater than or equal to"
+    },
+    {
+     "key": "less_than",
+     "label": "is less than"
+    },
+    {
+     "key": "less_than_or_equal",
+     "label": "is less than or equal to"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "invoice.subtotal",
+   "label": "Invoice subtotal",
+   "type": "number",
+   "group": "Amount",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "greater_than",
+     "label": "is greater than"
+    },
+    {
+     "key": "greater_than_or_equal",
+     "label": "is greater than or equal to"
+    },
+    {
+     "key": "less_than",
+     "label": "is less than"
+    },
+    {
+     "key": "less_than_or_equal",
+     "label": "is less than or equal to"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "invoice.tax",
+   "label": "Tax amount",
+   "type": "number",
+   "group": "Amount",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "greater_than",
+     "label": "is greater than"
+    },
+    {
+     "key": "greater_than_or_equal",
+     "label": "is greater than or equal to"
+    },
+    {
+     "key": "less_than",
+     "label": "is less than"
+    },
+    {
+     "key": "less_than_or_equal",
+     "label": "is less than or equal to"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "invoice.taxRate",
+   "label": "Effective tax rate (%)",
+   "type": "number",
+   "group": "Amount",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "greater_than",
+     "label": "is greater than"
+    },
+    {
+     "key": "greater_than_or_equal",
+     "label": "is greater than or equal to"
+    },
+    {
+     "key": "less_than",
+     "label": "is less than"
+    },
+    {
+     "key": "less_than_or_equal",
+     "label": "is less than or equal to"
+    }
+   ],
+   "options": null,
+   "help": "tax \u00f7 subtotal \u00d7 100"
+  },
+  {
+   "key": "invoice.currency",
+   "label": "Currency",
+   "type": "string",
+   "group": "Invoice",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "invoice.invoiceDate",
+   "label": "Invoice date",
+   "type": "date",
+   "group": "Invoice",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "greater_than",
+     "label": "is greater than"
+    },
+    {
+     "key": "greater_than_or_equal",
+     "label": "is greater than or equal to"
+    },
+    {
+     "key": "less_than",
+     "label": "is less than"
+    },
+    {
+     "key": "less_than_or_equal",
+     "label": "is less than or equal to"
+    }
+   ],
+   "options": null,
+   "help": "YYYY-MM-DD"
+  },
+  {
+   "key": "invoice.dueDate",
+   "label": "Due date",
+   "type": "date",
+   "group": "Invoice",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "greater_than",
+     "label": "is greater than"
+    },
+    {
+     "key": "greater_than_or_equal",
+     "label": "is greater than or equal to"
+    },
+    {
+     "key": "less_than",
+     "label": "is less than"
+    },
+    {
+     "key": "less_than_or_equal",
+     "label": "is less than or equal to"
+    }
+   ],
+   "options": null,
+   "help": "YYYY-MM-DD"
+  },
+  {
+   "key": "invoice.riskLevel",
+   "label": "Risk level",
+   "type": "risk",
+   "group": "Risk",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "greater_than",
+     "label": "is greater than"
+    },
+    {
+     "key": "greater_than_or_equal",
+     "label": "is greater than or equal to"
+    },
+    {
+     "key": "less_than",
+     "label": "is less than"
+    },
+    {
+     "key": "less_than_or_equal",
+     "label": "is less than or equal to"
+    }
+   ],
+   "options": [
+    "LOW",
+    "MEDIUM",
+    "HIGH",
+    "CRITICAL"
+   ],
+   "help": null
+  },
+  {
+   "key": "invoice.duplicateDetected",
+   "label": "Duplicate detected",
+   "type": "boolean",
+   "group": "Risk",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "invoice.purchaseOrderPresent",
+   "label": "Purchase order present",
+   "type": "boolean",
+   "group": "Invoice",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "invoice.aiConfidence",
+   "label": "AI confidence (%)",
+   "type": "number",
+   "group": "AI",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "greater_than",
+     "label": "is greater than"
+    },
+    {
+     "key": "greater_than_or_equal",
+     "label": "is greater than or equal to"
+    },
+    {
+     "key": "less_than",
+     "label": "is less than"
+    },
+    {
+     "key": "less_than_or_equal",
+     "label": "is less than or equal to"
+    }
+   ],
+   "options": null,
+   "help": "0\u2013100"
+  },
+  {
+   "key": "vendor.name",
+   "label": "Vendor name",
+   "type": "string",
+   "group": "Vendor",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "contains",
+     "label": "contains"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "vendor.id",
+   "label": "Specific vendor",
+   "type": "string",
+   "group": "Vendor",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "vendor.industry",
+   "label": "Vendor industry",
+   "type": "string",
+   "group": "Vendor",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "contains",
+     "label": "contains"
+    }
+   ],
+   "options": null,
+   "help": null
+  },
+  {
+   "key": "vendor.group",
+   "label": "Vendor group",
+   "type": "string",
+   "group": "Vendor",
+   "operators": [
+    {
+     "key": "equals",
+     "label": "equals"
+    },
+    {
+     "key": "not_equals",
+     "label": "does not equal"
+    },
+    {
+     "key": "contains",
+     "label": "contains"
+    }
+   ],
+   "options": null,
+   "help": null
+  }
+ ],
+ "triggers": [
+  {
+   "key": "INVOICE_UPLOADED",
+   "label": "Invoice uploaded",
+   "allowsDecisionActions": false
+  },
+  {
+   "key": "INVOICE_PROCESSED",
+   "label": "Invoice processed",
+   "allowsDecisionActions": true
+  },
+  {
+   "key": "INVOICE_VALIDATION_FAILED",
+   "label": "Validation failed",
+   "allowsDecisionActions": true
+  },
+  {
+   "key": "DUPLICATE_DETECTED",
+   "label": "Duplicate detected",
+   "allowsDecisionActions": true
+  },
+  {
+   "key": "ANOMALY_DETECTED",
+   "label": "Anomaly detected",
+   "allowsDecisionActions": true
+  },
+  {
+   "key": "APPROVAL_REQUESTED",
+   "label": "Approval requested",
+   "allowsDecisionActions": false
+  },
+  {
+   "key": "APPROVAL_COMPLETED",
+   "label": "Approval completed",
+   "allowsDecisionActions": false
+  },
+  {
+   "key": "INVOICE_APPROVED",
+   "label": "Invoice approved",
+   "allowsDecisionActions": false
+  },
+  {
+   "key": "INVOICE_REJECTED",
+   "label": "Invoice rejected",
+   "allowsDecisionActions": false
+  }
+ ],
+ "actions": [
+  {
+   "type": "AUTO_APPROVE",
+   "label": "Auto-approve invoice",
+   "kind": "decision"
+  },
+  {
+   "type": "REQUIRE_APPROVAL",
+   "label": "Require approval",
+   "kind": "decision"
+  },
+  {
+   "type": "REQUIRE_MULTI_LEVEL_APPROVAL",
+   "label": "Require multi-level approval",
+   "kind": "decision"
+  },
+  {
+   "type": "REJECT_INVOICE",
+   "label": "Reject invoice",
+   "kind": "decision"
+  },
+  {
+   "type": "SEND_NOTIFICATION",
+   "label": "Send notification",
+   "kind": "effect"
+  },
+  {
+   "type": "CREATE_TASK",
+   "label": "Create task",
+   "kind": "effect"
+  },
+  {
+   "type": "ADD_TAG",
+   "label": "Add tag",
+   "kind": "effect"
+  },
+  {
+   "type": "MOVE_TO_EXCEPTION_QUEUE",
+   "label": "Move to exception queue",
+   "kind": "decision"
+  },
+  {
+   "type": "SET_RISK_LEVEL",
+   "label": "Set risk level",
+   "kind": "effect"
+  },
+  {
+   "type": "UPDATE_STATUS",
+   "label": "Update status",
+   "kind": "effect"
+  },
+  {
+   "type": "REQUEST_HUMAN_REVIEW",
+   "label": "Request human review",
+   "kind": "decision"
+  },
+  {
+   "type": "TRIGGER_AI_ANALYSIS",
+   "label": "Trigger AI analysis",
+   "kind": "effect"
+  }
+ ]
+}
