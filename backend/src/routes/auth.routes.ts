@@ -19,8 +19,9 @@ const limiter = rateLimit({
 });
 
 const COOKIE = 'if_refresh';
+// No maxAge => session cookie: the browser deletes it when it is fully closed.
 const setRefreshCookie = (res: Response, token: string) =>
-  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', secure: env.COOKIE_SECURE, path: '/api/auth', maxAge: env.REFRESH_TOKEN_DAYS * 86400000 });
+  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', secure: env.COOKIE_SECURE, path: '/api/auth' });
 
 authRouter.post(
   '/register',
@@ -87,5 +88,3 @@ authRouter.post(
     ok(res, { reset: true });
   }),
 );
-
-give updated code of this
