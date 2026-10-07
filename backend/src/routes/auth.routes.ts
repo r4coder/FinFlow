@@ -87,3 +87,5 @@ authRouter.post(
     ok(res, { reset: true });
   }),
 );
+
+give updated code of this
